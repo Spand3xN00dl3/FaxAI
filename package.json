@@ -1,0 +1,22 @@
+{
+  "name": "faxai",
+  "version": "1.0.0",
+  "description": "AI Note Taking App",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@azure/storage-blob": "^12.27.0",
+    "@chatterboxio/bot": "^1.2.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.1.0",
+    "express": "^5.1.0",
+    "nodemon": "^3.1.10",
+    "openai": "^5.8.2",
+    "puppeteer": "^24.11.1"
+  },
+  "type": "module"
+}
