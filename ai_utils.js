@@ -1,4 +1,4 @@
-import { getOpenAIClient } from "./clients";
+import { getOpenAIClient } from "./clients.js";
 
 const openai = getOpenAIClient();
 
