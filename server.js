@@ -9,8 +9,8 @@ import { configDotenv } from 'dotenv';
 import OpenAI from 'openai';
 
 import { getChatterBoxClient, getBlobServiceClient } from './clients.js';
-import { uploadAudioFileToBlob, uploadTextToBlob, updateSessionInfo } from './blob_utils';
-import { transcribeAudio, generateNotesWithSources } from './ai_utils';
+import { uploadAudioFileToBlob, uploadTextToBlob, updateSessionInfo } from './blob_utils.js';
+import { transcribeAudio, generateNotesWithSources } from './ai_utils.js';
 
 configDotenv();
 const app = express();
