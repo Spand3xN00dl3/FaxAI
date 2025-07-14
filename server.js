@@ -8,7 +8,7 @@ import { promisify } from 'util';
 import { configDotenv } from 'dotenv';
 import OpenAI from 'openai';
 
-import { getChatterBoxClient, getBlobServiceClient } from './clients';
+import { getChatterBoxClient, getBlobServiceClient } from './clients.js';
 import { uploadAudioFileToBlob, uploadTextToBlob, updateSessionInfo } from './blob_utils';
 import { transcribeAudio, generateNotesWithSources } from './ai_utils';
 
