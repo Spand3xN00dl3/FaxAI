@@ -1,12 +1,9 @@
 import express from 'express';
 import cors from 'cors';
-// import { ChatterBox } from "@chatterboxio/bot";
-
 import fs from 'fs'
 import { pipeline } from 'stream';
 import { promisify } from 'util';
 import { configDotenv } from 'dotenv';
-import OpenAI from 'openai';
 
 import { getChatterBoxClient, getBlobServiceClient } from './clients.js';
 import { uploadAudioFileToBlob, uploadTextToBlob, updateSessionInfo } from './blob_utils.js';
