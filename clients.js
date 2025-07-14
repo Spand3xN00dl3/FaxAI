@@ -8,6 +8,10 @@ const chatterBoxClient = ChatterBox({
 
 const blobServiceClient = BlobServiceClient.fromConnectionString(process.env.AZURE_BLOB_STORAGE_CONNECTION_STRING);
 
+const openai = new OpenAI({
+	apiKey: process.env.OPENAI_API_KEY,
+});
+
 function getChatterBoxClient() {
 	return chatterBoxClient;
 }
@@ -16,4 +20,9 @@ function getBlobServiceClient() {
 	return blobServiceClient;
 }
 
-export { getChatterBoxClient, getBlobServiceClient };
+function getOpenAIClient() {
+	return openai;
+}
+
+
+export { getChatterBoxClient, getBlobServiceClient, getOpenAIClient };
