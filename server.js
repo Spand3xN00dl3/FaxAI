@@ -5,14 +5,16 @@ import { pipeline } from 'stream';
 import { promisify } from 'util';
 import { configDotenv } from 'dotenv';
 
-import { getChatterBoxClient, getBlobServiceClient } from './clients.js';
-import { uploadAudioFileToBlob, uploadTextToBlob, updateSessionInfo } from './blob_utils.js';
-import { transcribeAudio, generateNotesWithSources } from './ai_utils.js';
-
 configDotenv();
 const app = express();
 app.use(express.json());
 app.use(cors());
+
+import { getChatterBoxClient, getBlobServiceClient } from './clients.js';
+import { uploadAudioFileToBlob, uploadTextToBlob, updateSessionInfo } from './blob_utils.js';
+import { transcribeAudio, generateNotesWithSources } from './ai_utils.js';
+
+
 
 app.post("/join", async (req, res) => {
   try {

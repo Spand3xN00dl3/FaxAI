@@ -1,8 +1,8 @@
 import { getOpenAIClient } from "./clients.js";
 
-const openai = getOpenAIClient();
 
 async function transcribeAudio(filename) {
+  const openai = getOpenAIClient();
   const fileStream = fs.createReadStream(`recordings/${filename}`);
 
   const response = await openai.audio.transcriptions.create({
@@ -15,6 +15,7 @@ async function transcribeAudio(filename) {
 }
 
 async function generateNotesWithSources(text) {
+  const openai = getOpenAIClient();
   console.log("generating notes")
   const response = await openai.chat.completions.create({
     model: 'gpt-4',
