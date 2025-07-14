@@ -1,27 +1,20 @@
 import express from 'express';
 import cors from 'cors';
-import { ChatterBox } from "@chatterboxio/bot";
+// import { ChatterBox } from "@chatterboxio/bot";
+
 import fs from 'fs'
 import { pipeline } from 'stream';
 import { promisify } from 'util';
 import { configDotenv } from 'dotenv';
-import { BlobServiceClient } from '@azure/storage-blob';
 import OpenAI from 'openai';
+
+import { getChatterBoxClient, getBlobServiceClient } from './clients';
+import { uploadAudioFileToBlob, uploadTextToBlob } from './blob_utils';
 
 configDotenv();
 const app = express();
 app.use(express.json());
 app.use(cors());
-
-function getChatterBoxClient() {
-  const client = ChatterBox({
-    authorizationToken: process.env.CHATTER_BOX_TOKEN
-  });
-
-  return client;
-}
-
-const blobServiceClient = BlobServiceClient.fromConnectionString(process.env.AZURE_BLOB_STORAGE_CONNECTION_STRING);
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -71,26 +64,36 @@ async function recordMeeting(client, sessionID, userID) {
 
 
 async function processRecording(url, sessionID, userID) {
+  // save file
   const filename = `recording-${sessionID}.mp3`;
   const stream = fs.createWriteStream(`recordings/${filename}`);
   await fetchAudio(url, stream);
+
+  // setup blob container connection
+  const blobClient = getBlobServiceClient();
   const containerName = `user-${userID}`;
-  await uploadAudioToBlob(containerName, filename)
+  const containerClient = blobClient.getContainerClient(containerName);
+
+  // upload recording to container blob
+  await uploadAudioFileToBlob(containerClient, filename)
+
+  // generate transcription and upload to blob
   const transcription = await transcribeAudio(filename);
-  await uploadTextToBlob(containerName, `transcription-${sessionID}.txt`, transcription);
+  await uploadTextToBlob(containerClient, `transcription-${sessionID}.txt`, transcription);
+
+  // generate notes and upload
   const notes = await generateNotesWithSources(transcription);
-  console.log("test 1")
-  await uploadTextToBlob(containerName, `notes-${sessionID}.txt`, notes);
+  await uploadTextToBlob(containerClient, `notes-${sessionID}.txt`, notes);
 }
 
-// async function updateSessions(containerName, sessionID) {
-//   const containerClient = blobServiceClient.getContainerClient(containerName);
-//   const blockBlobClient = containerClient.getBlockBlobClient('sessions.json');
-//   const sessions =
-//   if(bl)
-// }
+async function updateSessions(containerClient, sessionID) {
+  const blockBlobClient = containerClient.getBlockBlobClient('sessions.json');
+  const fileExists = await blockBlobClient.exists();
 
-// async func
+  if(!fileExists) {
+    blockBlobClient.up
+  }
+}
 
 function streamToBuffer(readableStream) {
     return new Promise((resolve, reject) => {
@@ -120,22 +123,6 @@ async function fetchAudio(url, stream) {
 }
 
 
-async function uploadAudioToBlob(containerName, filename) {
-  const containerClient = blobServiceClient.getContainerClient(containerName);
-  await containerClient.createIfNotExists();
-  const blobBlockClient = containerClient.getBlockBlobClient(filename);
-
-  const stream = fs.createReadStream(`recordings/${filename}`);
-  const uploadOptions = {
-    blobHTTPHeaders: { blobContentType: 'audio/mpeg' },
-  };
-
-  // use .uploadFile(filepath, options) instead in the future
-  await blobBlockClient.uploadStream(stream, undefined, undefined, uploadOptions);
-  console.log(`Uploaded file: ${filename} to container: ${containerName}`);
-}
-
-
 async function transcribeAudio(filename) {
   const fileStream = fs.createReadStream(`recordings/${filename}`);
 
@@ -146,15 +133,6 @@ async function transcribeAudio(filename) {
 
   console.log('Transcription:', response.text);
   return response.text;
-}
-
-async function uploadTextToBlob(containerName, filename, transcription) {
-  console.log('test 2');
-  const containerClient = blobServiceClient.getContainerClient(containerName);
-  await containerClient.createIfNotExists();
-  const blobBlockClient = containerClient.getBlockBlobClient(filename);
-  await blobBlockClient.upload(transcription, transcription.length)
-  console.log(`Uploaded text as blob: ${filename} to container: ${containerName}`);
 }
 
 async function generateNotesWithSources(text) {
@@ -175,7 +153,6 @@ async function generateNotesWithSources(text) {
     temperature: 0.7,
   });
 
-  console.log('test 3')
   const notes = response.choices[0].message.content
   console.log(`Generated Notes: ${notes}`);
   return notes;
