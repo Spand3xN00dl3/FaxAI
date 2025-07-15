@@ -1,4 +1,5 @@
 import { getOpenAIClient } from "./clients.js";
+import fs from 'fs'
 
 
 async function transcribeAudio(filename) {

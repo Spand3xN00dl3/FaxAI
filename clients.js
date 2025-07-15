@@ -1,7 +1,7 @@
 import { ChatterBox } from "@chatterboxio/bot";
 import { BlobServiceClient } from '@azure/storage-blob';
 import OpenAI from 'openai';
-import { configDotenv } from 'dotenv';
+// import { configDotenv } from 'dotenv';
 
 // configDotenv();
 
@@ -30,7 +30,7 @@ function getChatterBoxClient() {
 
 function getBlobServiceClient() {
 	if(!blobServiceClient) {
-		BlobServiceClient.fromConnectionString(process.env.AZURE_BLOB_STORAGE_CONNECTION_STRING);
+		blobServiceClient = BlobServiceClient.fromConnectionString(process.env.AZURE_BLOB_STORAGE_CONNECTION_STRING);
 	}
 
 	return blobServiceClient;
