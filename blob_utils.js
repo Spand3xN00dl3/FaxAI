@@ -58,5 +58,16 @@ async function getNotesFromBlob(containerClient, sessionID) {
 	return resBuffer.toString();
 }
 
+async function getBlobFiles(containerClient) {
+	const blobs = [];
 
-export { uploadAudioFileToBlob, uploadTextToBlob, getSessionInfo, setSessionInfo, getNotesFromBlob };
+	for await (const blob of containerClient.listBlobsFlat()) {
+		// totalSizeBytes += blob.properties.contentLength ?? 0;
+		blobs.push(blob);
+	}
+
+	return blobs;
+}
+
+
+export { uploadAudioFileToBlob, uploadTextToBlob, getSessionInfo, setSessionInfo, getNotesFromBlob, getBlobFiles };

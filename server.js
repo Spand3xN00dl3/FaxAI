@@ -11,7 +11,7 @@ app.use(express.json());
 app.use(cors());
 
 import { getChatterBoxClient, getBlobServiceClient } from './clients.js';
-import { uploadAudioFileToBlob, uploadTextToBlob, getSessionInfo, setSessionInfo, getNotesFromBlob } from './blob_utils.js';
+import { uploadAudioFileToBlob, uploadTextToBlob, getSessionInfo, setSessionInfo, getNotesFromBlob, getBlobFiles } from './blob_utils.js';
 import { transcribeAudio, generateNotesWithSources } from './ai_utils.js';
 
 
@@ -34,6 +34,52 @@ app.post("/join", async (req, res) => {
   }
 });
 
+
+app.get("/users/:userid/storage", async (req, res) => {
+  const userID = req.params.userid;
+
+  if(!userID) {
+    res.status(400).json({ errorMsg: "missing userid" });
+  }
+
+  const blobClient = getBlobServiceClient();
+  const containerClient = blobClient.getContainerClient(`user-${userID}`);
+  const blobFiles = await getBlobFiles(containerClient);
+  let totalSizeBytes = 0;
+  blobFiles.forEach((file) => (
+    totalSizeBytes += file.properties.contentLength ?? 0
+  ));
+  res.json({
+    message: "success",
+    totalSizeBytes,
+    totalSizeMB: (totalSizeBytes / (1000000)).toFixed(2),
+    totalSizeMiB: (totalSizeBytes / (1024 * 1024)).toFixed(2),
+    fileCount: blobFiles.length
+  });
+});
+
+app.get("/users/:userid/transcriptions", async (req, res) => {
+  const userID = req.params.userid;
+
+  if(!userID) {
+    res.status(400).json({ errorMsg: "missing userid" });
+  }
+
+  const blobClient = getBlobServiceClient();
+  const containerClient = blobClient.getContainerClient(`user-${userID}`);
+  const blobFiles = await getBlobFiles(containerClient);
+  let transcriptionCount = 0;
+  blobFiles.forEach((blob) => {
+    if(blob.name.startsWith("transcription")) {
+      transcriptionCount++;
+    }
+  });
+
+  res.json({
+    message: "success",
+    transcriptionCount
+  });
+});
 
 app.get("/users/:userid/meetings", async (req, res) => {
   const userID = req.params.userid;
